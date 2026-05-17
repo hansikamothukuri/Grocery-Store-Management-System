@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block title %}Products{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-item active">Products</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Products</h1>
+        <p class="page-subtitle">Manage your product catalog and inventory</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-outline-secondary me-2" onclick="openCategoryModal()">
+            <i class="bi bi-tags me-1"></i>Categories
+        </button>
+        <button class="btn btn-primary btn-glow" onclick="openProductModal()">
+            <i class="bi bi-plus-lg me-1"></i>Add Product
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="searchInput" class="form-control search-input" placeholder="Search products..." oninput="debounceSearch()">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select custom-select" id="categoryFilter" onchange="loadProducts()">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select custom-select" id="statusFilter" onchange="loadProducts()">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                <i class="bi bi-x-circle me-1"></i>Reset
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Products Table -->
+<div class="card-custom">
+    <div class="card-body-custom p-0">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productsBody">
+                    <tr><td colspan="6" class="text-center text-muted py-5">Loading products...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-footer" id="tablePagination"></div>
+    </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content modal-custom">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title" id="productModalTitle">Add Product</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="productFormAlert" class="alert" style="display:none;"></div>
+                <div class="row g-3">
+                    <input type="hidden" id="productId">
+                    <div class="col-md-8">
+                        <label class="form-label" for="productName">Product Name <span class="text-danger">*</span></label>
+                        <input type="text" id="productName" class="form-control" placeholder="e.g. Tata Salt 1kg">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="productCategory">Category <span class="text-danger">*</span></label>
+                        <select id="productCategory" class="form-select"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="productPrice">Selling Price (₹) <span class="text-danger">*</span></label>
+                        <input type="number" id="productPrice" class="form-control" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="productCostPrice">Cost Price (₹)</label>
+                        <input type="number" id="productCostPrice" class="form-control" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="productBarcode">Barcode</label>
+                        <input type="text" id="productBarcode" class="form-control" placeholder="Optional">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="productQuantity">Stock Quantity <span class="text-danger">*</span></label>
+                        <input type="number" id="productQuantity" class="form-control" placeholder="0" min="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="productThreshold">Low Stock Alert</label>
+                        <input type="number" id="productThreshold" class="form-control" placeholder="10" min="1" value="10">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="productUnit">Unit</label>
+                        <select id="productUnit" class="form-select">
+                            <option value="pcs">Pieces (pcs)</option>
+                            <option value="kg">Kilograms (kg)</option>
+                            <option value="g">Grams (g)</option>
+                            <option value="litre">Litres (L)</option>
+                            <option value="ml">Millilitres (ml)</option>
+                            <option value="dozen">Dozen</option>
+                            <option value="pack">Pack</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="productDescription">Description</label>
+                        <textarea id="productDescription" class="form-control" rows="2" placeholder="Optional product description"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="productImage">Product Image</label>
+                        <input type="file" id="productImage" class="form-control" accept="image/*">
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="productActive" checked>
+                            <label class="form-check-label" for="productActive">Product is Active</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer modal-footer-custom">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">
+                    <i class="bi bi-check-lg me-1"></i>Save Product
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Restock Modal -->
+<div class="modal fade" id="restockModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modal-custom">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title">Restock Product</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="restockProductName" class="fw-semibold mb-3"></p>
+                <div id="restockAlert" class="alert" style="display:none;"></div>
+                <label class="form-label">Quantity to Add</label>
+                <input type="number" id="restockQty" class="form-control" min="1" value="10" placeholder="Enter quantity">
+                <input type="hidden" id="restockProductId">
+            </div>
+            <div class="modal-footer modal-footer-custom">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success" onclick="submitRestock()">
+                    <i class="bi bi-plus-circle me-1"></i>Add Stock
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content modal-custom">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title">Manage Categories</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex gap-2 mb-3">
+                    <input type="text" id="newCategoryName" class="form-control" placeholder="New category name">
+                    <button class="btn btn-primary" onclick="addCategory()">Add</button>
+                </div>
+                <div id="categoryList" class="category-tag-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/products.js') }}"></script>
+{% endblock %}

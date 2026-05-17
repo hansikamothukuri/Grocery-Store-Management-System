@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Order History{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-item active">Order History</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Order History</h1>
+        <p class="page-subtitle">View and manage all customer orders</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-outline-secondary" onclick="exportReport()">
+            <i class="bi bi-download me-1"></i>Export Report
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="orderSearch" class="form-control search-input" placeholder="Order # or Customer..." oninput="debounceOrderSearch()">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select custom-select" id="orderStatus" onchange="loadOrders()">
+                <option value="">All Status</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small" for="dateFrom">From Date</label>
+            <input type="date" id="dateFrom" class="form-control" onchange="loadOrders()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small" for="dateTo">To Date</label>
+            <input type="date" id="dateTo" class="form-control" onchange="loadOrders()">
+        </div>
+        <div class="col-md-1">
+            <button class="btn btn-outline-secondary w-100" onclick="resetOrderFilters()">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="mini-stat-card">
+            <div class="mini-stat-label">Filtered Revenue</div>
+            <div class="mini-stat-value text-success" id="filteredRevenue">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="mini-stat-card">
+            <div class="mini-stat-label">Filtered Orders</div>
+            <div class="mini-stat-value text-primary" id="filteredOrders">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="mini-stat-card">
+            <div class="mini-stat-label">Avg Order Value</div>
+            <div class="mini-stat-value text-info" id="avgOrderValue">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="mini-stat-card">
+            <div class="mini-stat-label">Showing</div>
+            <div class="mini-stat-value" id="showingCount">—</div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card-custom">
+    <div class="card-body-custom p-0">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersBody">
+                    <tr><td colspan="8" class="text-center text-muted py-5">Loading orders...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-footer" id="orderPagination"></div>
+    </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content modal-custom">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title" id="orderDetailTitle">Order Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetailContent"></div>
+            <div class="modal-footer modal-footer-custom">
+                <button class="btn btn-outline-danger" id="cancelOrderBtn" onclick="cancelCurrentOrder()">
+                    <i class="bi bi-x-circle me-1"></i>Cancel Order
+                </button>
+                <button class="btn btn-primary" onclick="printCurrentInvoice()">
+                    <i class="bi bi-printer me-1"></i>Print Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/orders.js') }}"></script>
+{% endblock %}

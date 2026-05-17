@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-item active">Profile</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Profile Settings</h1>
+        <p class="page-subtitle">Manage your account information</p>
+    </div>
+</div>
+
+<div class="row g-4 justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="card-title-custom"><i class="bi bi-person-circle me-2"></i>Account Info</h3>
+            </div>
+            <div class="card-body-custom">
+                <div class="profile-avatar-section mb-4">
+                    <div class="profile-avatar-lg">{{ current_user.full_name[0].upper() }}</div>
+                    <div>
+                        <h4 class="mb-0">{{ current_user.full_name }}</h4>
+                        <span class="badge bg-primary">{{ current_user.role.title() }}</span>
+                        <p class="text-muted small mb-0 mt-1">Member since {{ current_user.created_at.strftime('%B %Y') }}</p>
+                    </div>
+                </div>
+
+                <div id="profileAlert" class="alert" style="display:none;"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="fullName">Full Name</label>
+                        <input type="text" id="fullName" class="form-control" value="{{ current_user.full_name }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" class="form-control" value="{{ current_user.email }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="profileUsername">Username</label>
+                        <input type="text" id="profileUsername" class="form-control" value="{{ current_user.username }}" disabled>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="profileRole">Role</label>
+                        <input type="text" id="profileRole" class="form-control" value="{{ current_user.role.title() }}" disabled>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="mb-3">Change Password</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-glow" onclick="saveProfile()">
+                        <i class="bi bi-check-lg me-1"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function saveProfile() {
+    const newPwd = document.getElementById('newPassword').value;
+    const confPwd = document.getElementById('confirmPassword').value;
+    if (newPwd && newPwd !== confPwd) {
+        showAlert('danger', 'New passwords do not match.');
+        return;
+    }
+    const data = {
+        full_name: document.getElementById('fullName').value,
+        email: document.getElementById('email').value,
+        current_password: document.getElementById('currentPassword').value,
+        new_password: newPwd,
+    };
+    const res = await fetch('/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    showAlert(result.success ? 'success' : 'danger', result.message);
+}
+
+function showAlert(type, msg) {
+    const el = document.getElementById('profileAlert');
+    el.className = `alert alert-${type}`;
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+}
+</script>
+{% endblock %}

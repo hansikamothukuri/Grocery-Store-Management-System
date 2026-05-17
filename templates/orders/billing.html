@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}New Sale{% endblock %}
+
+{% block breadcrumb %}
+<a href="{{ url_for('dashboard.index') }}" class="breadcrumb-item">Dashboard</a>
+<span class="breadcrumb-sep">/</span>
+<span class="breadcrumb-item active">New Sale</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Point of Sale</h1>
+        <p class="page-subtitle">Create a new customer order</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left: Product Search -->
+    <div class="col-lg-7">
+        <div class="card-custom mb-4">
+            <div class="card-header-custom">
+                <h3 class="card-title-custom"><i class="bi bi-search me-2"></i>Find Products</h3>
+            </div>
+            <div class="card-body-custom">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-7">
+                        <div class="search-box">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" id="posSearch" class="form-control search-input" placeholder="Search by name or barcode..." oninput="debouncePosSearch()">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <select class="form-select custom-select" id="posCategoryFilter" onchange="loadPosProducts()">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="posProductGrid" class="product-grid">
+                    <div class="text-center text-muted py-5">Search for products above</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Cart & Checkout -->
+    <div class="col-lg-5">
+        <div class="card-custom sticky-top" style="top: 80px;">
+            <div class="card-header-custom">
+                <h3 class="card-title-custom"><i class="bi bi-cart3 me-2"></i>Order Cart</h3>
+                <button class="btn btn-sm btn-outline-danger" onclick="clearCart()">
+                    <i class="bi bi-trash me-1"></i>Clear
+                </button>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="card-body-custom border-bottom pb-3">
+                <div class="row g-2">
+                    <div class="col-7">
+                        <input type="text" id="customerName" class="form-control form-control-sm" placeholder="Customer name (optional)">
+                    </div>
+                    <div class="col-5">
+                        <input type="tel" id="customerPhone" class="form-control form-control-sm" placeholder="Phone (opt.)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="card-body-custom p-0">
+                <div id="cartItems" class="cart-list">
+                    <div class="cart-empty" id="cartEmpty">
+                        <i class="bi bi-cart-x"></i>
+                        <p>Your cart is empty</p>
+                        <small>Search and add products</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Totals -->
+            <div class="card-body-custom border-top">
+                <div class="billing-row">
+                    <span>Subtotal</span>
+                    <span id="cartSubtotal">₹0.00</span>
+                </div>
+                <div class="billing-row">
+                    <span>Discount (₹)</span>
+                    <input type="number" id="discountAmount" class="form-control form-control-sm billing-input" value="0" min="0" oninput="recalcTotal()">
+                </div>
+                <div class="billing-row">
+                    <span>Tax (%)</span>
+                    <input type="number" id="taxRate" class="form-control form-control-sm billing-input" value="0" min="0" max="100" oninput="recalcTotal()">
+                </div>
+                <div class="billing-row billing-total">
+                    <span>Total</span>
+                    <span id="cartTotal">₹0.00</span>
+                </div>
+            </div>
+
+            <!-- Payment -->
+            <div class="card-body-custom border-top">
+                <label class="form-label small fw-semibold mb-2">Payment Method</label>
+                <div class="payment-methods">
+                    <label class="pay-method active" id="pm-cash">
+                        <input type="radio" name="payment" value="cash" checked onchange="selectPayment(this)">
+                        <i class="bi bi-cash"></i> Cash
+                    </label>
+                    <label class="pay-method" id="pm-card">
+                        <input type="radio" name="payment" value="card" onchange="selectPayment(this)">
+                        <i class="bi bi-credit-card"></i> Card
+                    </label>
+                    <label class="pay-method" id="pm-upi">
+                        <input type="radio" name="payment" value="upi" onchange="selectPayment(this)">
+                        <i class="bi bi-phone"></i> UPI
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action -->
+            <div class="card-body-custom">
+                <button class="btn btn-success w-100 btn-glow btn-lg" id="placeOrderBtn" onclick="placeOrder()" disabled>
+                    <i class="bi bi-bag-check-fill me-2"></i>Place Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invoice Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content modal-custom">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Invoice</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="invoiceContent"></div>
+            <div class="modal-footer modal-footer-custom">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal" onclick="startNewSale()">New Sale</button>
+                <button class="btn btn-primary" onclick="printInvoice()">
+                    <i class="bi bi-printer me-1"></i>Print Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/billing.js') }}"></script>
+{% endblock %}

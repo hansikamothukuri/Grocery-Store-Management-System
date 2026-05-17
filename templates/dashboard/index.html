@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-item active">Dashboard</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Welcome back, {{ current_user.full_name }}</p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ url_for('orders.billing') }}" class="btn btn-primary btn-glow">
+            <i class="bi bi-cart-plus-fill me-2"></i>New Sale
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4" id="statsRow">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
+            <div class="stat-body">
+                <div class="stat-label">Today's Sales</div>
+                <div class="stat-value" id="todaySales">—</div>
+                <div class="stat-sub" id="monthSales">Loading...</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="bi bi-receipt"></i></div>
+            <div class="stat-body">
+                <div class="stat-label">Today's Orders</div>
+                <div class="stat-value" id="todayOrders">—</div>
+                <div class="stat-sub" id="totalOrders">Loading...</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
+            <div class="stat-body">
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value" id="totalProducts">—</div>
+                <div class="stat-sub" id="totalCategories">Loading...</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="stat-body">
+                <div class="stat-label">Low Stock Items</div>
+                <div class="stat-value" id="lowStockCount">—</div>
+                <div class="stat-sub" id="outOfStockCount">Loading...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-8">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="card-title-custom"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Sales — Last 7 Days</h3>
+            </div>
+            <div class="card-body-custom">
+                <canvas id="salesChart" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="card-title-custom"><i class="bi bi-pie-chart-fill me-2 text-info"></i>By Category</h3>
+            </div>
+            <div class="card-body-custom">
+                <canvas id="categoryChart" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Row -->
+<div class="row g-4">
+    <div class="col-xl-7">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="card-title-custom"><i class="bi bi-clock-history me-2 text-success"></i>Recent Orders</h3>
+                <a href="{{ url_for('orders.orders') }}" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body-custom p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersBody">
+                            <tr><td colspan="5" class="text-center text-muted py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-5">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="card-title-custom"><i class="bi bi-exclamation-circle-fill me-2 text-warning"></i>Low Stock Alerts</h3>
+                <a href="{{ url_for('products.index') }}" class="btn btn-sm btn-outline-secondary">Manage</a>
+            </div>
+            <div class="card-body-custom p-0">
+                <div id="lowStockList">
+                    <div class="text-center text-muted py-4">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

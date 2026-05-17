@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FreshMart{% endblock %} — Grocery Management</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <i class="bi bi-basket3-fill"></i>
+        </div>
+        <div class="brand-text">
+            <span class="brand-name">FreshMart</span>
+            <span class="brand-sub">Management</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="{{ url_for('dashboard.index') }}" class="nav-link-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('orders.billing') }}" class="nav-link-item {% if request.endpoint == 'orders.billing' %}active{% endif %}">
+            <i class="bi bi-cart4"></i>
+            <span>New Sale</span>
+            <span class="nav-badge">POS</span>
+        </a>
+
+        <div class="nav-section-label mt-3">Inventory</div>
+        <a href="{{ url_for('products.index') }}" class="nav-link-item {% if request.endpoint == 'products.index' %}active{% endif %}">
+            <i class="bi bi-box-seam-fill"></i>
+            <span>Products</span>
+        </a>
+
+        <div class="nav-section-label mt-3">Sales</div>
+        <a href="{{ url_for('orders.orders') }}" class="nav-link-item {% if request.endpoint == 'orders.orders' %}active{% endif %}">
+            <i class="bi bi-receipt-cutoff"></i>
+            <span>Order History</span>
+        </a>
+
+        <div class="nav-section-label mt-3">Account</div>
+        <a href="{{ url_for('auth.profile') }}" class="nav-link-item {% if request.endpoint == 'auth.profile' %}active{% endif %}">
+            <i class="bi bi-person-fill"></i>
+            <span>Profile</span>
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link-item text-danger">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="user-card">
+            <div class="user-avatar">{{ current_user.full_name[0].upper() }}</div>
+            <div class="user-info">
+                <div class="user-name">{{ current_user.full_name }}</div>
+                <div class="user-role">{{ current_user.role.title() }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<div class="main-content" id="mainContent">
+    <!-- Top bar -->
+    <div class="topbar">
+        <button class="btn btn-icon sidebar-toggle" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="topbar-breadcrumb">
+            {% block breadcrumb %}{% endblock %}
+        </div>
+        <div class="topbar-right">
+            <div class="stock-alert-btn" id="stockAlertBtn" style="display:none;">
+                <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                <span class="alert-count" id="alertCount">0</span>
+            </div>
+            <span class="topbar-date" id="topbarDate"></span>
+        </div>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Page content -->
+    <div class="page-content">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+{% else %}
+<!-- Unauthenticated layout -->
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- App JS -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
