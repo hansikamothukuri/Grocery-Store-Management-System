@@ -34,6 +34,20 @@ This project is ideal for a grocery shop or retail store owner who wants a compa
 6. Export filtered order reports to CSV from the order history screen.
 7. Manage user profile and update the default admin password.
 
+## Screenshots
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e97eb524-2079-42ad-8da6-1507cccdf603" />
+
+
+
+<img width="1910" height="1123" alt="image" src="https://github.com/user-attachments/assets/ab48a2d6-8cd0-4434-82d0-a263b20bfee3" />
+
+
+<img width="1910" height="1185" alt="image" src="https://github.com/user-attachments/assets/2340d62b-957e-4f5c-a489-68d53dd1f039" />
+
+
+<img width="1910" height="1000" alt="image" src="https://github.com/user-attachments/assets/e39c399d-0822-4cf0-b6b2-f2a0ce17a1ee" />
+
 ## Project Structure
 ```
 grocery_store/
